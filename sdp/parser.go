@@ -2,6 +2,7 @@ package sdp
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -236,9 +237,10 @@ type Repeat struct {
 func parseRepeat(s string) (Repeat, error) {
 	// guard against negative durations, decimals.
 	// these are valid for time.ParseDuration, but not for our Repeat.
-	if i := strings.IndexAny(s, "-."); i > 0 {
-		return Repeat{}, fmt.Errorf("illegal character %c", s[i])
+	if strings.Contains(s, "-") || strings.Contains(s, ".") {
+		return Repeat{}, errors.New("invalid duration")
 	}
+
 	fields := strings.Fields(s)
 	if len(fields) < 3 {
 		return Repeat{}, fmt.Errorf("short line: have %d, want at least %d fields", len(fields), 3)
